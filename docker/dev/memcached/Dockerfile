@@ -1,0 +1,6 @@
+ARG MEMCACHED_VERSION
+FROM memcached:${MEMCACHED_VERSION}-alpine
+
+CMD ["memcached"]
+
+# EXPOSE 11211

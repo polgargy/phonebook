@@ -1,0 +1,122 @@
+version: '3'
+
+services:
+    nginx:
+        build:
+            context: docker/${DOCKER_ENV}/nginx
+            dockerfile: Dockerfile
+            args:
+                - NGINX_VERSION=${NGINX_VERSION}
+        volumes:
+            - ./:/var/www
+            - ./docker/${DOCKER_ENV}/nginx/logs:/var/log/nginx
+        ports:
+            - "${APP_PORT}:80"
+        links:
+            - node
+            - php
+
+    php:
+        build:
+            context: docker/${DOCKER_ENV}/php
+            dockerfile: Dockerfile
+            args:
+                - PHP_VERSION=${PHP_VERSION}
+        volumes:
+            - ./:/var/www
+        environment:
+            XDEBUG_CONFIG: "remote_enable=1"
+            PHP_IDE_CONFIG: "serverName=Docker"
+        links:
+            - mariadb
+            #
+            # - redis
+            # - memcached
+            #
+            # - mailhog
+
+            # Supervisor container (schedule and queue runner)
+            # supervisor:
+            #   build:
+            #     context: docker/${DOCKER_ENV}/supervisor
+            #     dockerfile: Dockerfile
+            #   volumes:
+            #     - ./:/var/www/
+            #     - ./docker/${DOCKER_ENV}/supervisor/conf.d:/etc/supervisor/conf.d
+            #     - ./docker/${DOCKER_ENV}/supervisor/logs:/var/log
+            #   links:
+            #     - mariadb
+            #     # - redis
+            #     # - mailhog
+
+    # MariaDB
+    mariadb:
+        build:
+            context: docker/${DOCKER_ENV}/mariadb
+            dockerfile: Dockerfile
+            args:
+                - MARIADB_VERSION=${MARIADB_VERSION}
+        environment:
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+        ports:
+            - "${MYSQL_PORT}:3306"
+        expose:
+            - '3306'
+        volumes:
+            # Database volume
+            - database:/var/lib/mysql
+
+    # Redis container
+    # redis:
+    #     build:
+    #         context: docker/${DOCKER_ENV}/redis
+    #         dockerfile: Dockerfile
+    #         args:
+    #             - REDIS_VERSION=${REDIS_VERSION}
+    #     volumes:
+    #         - redis:/data
+    #     ports:
+    #         - "${REDIS_PORT}:6379"
+
+    # Memcached
+    # FIXME modify php Dockerfile (search for "memcached")
+    # memcached:
+    #     build:
+    #         context: docker/${DOCKER_ENV}/memcached
+    #         dockerfile: Dockerfile
+    #         args:
+    #             - MEMCACHED_VERSION=${MEMCACHED_VERSION}
+    #     volumes:
+    #         # - ./docker/${DOCKER_ENV}/memcached/data:/var/lib/memcached
+    #         - memcached:/var/lib/memcached
+    #     ports:
+    #         - "${MEMCACHED_PORT}:11211"
+
+    # Mailhog container (SMTP testing)
+    # mailhog:
+    #     build:
+    #         context: docker/${DOCKER_ENV}/mailhog
+    #         dockerfile: Dockerfile
+    #     ports:
+    #         - "${MAILHOG_PORT}:8025"
+
+    node:
+        build:
+            context: docker/${DOCKER_ENV}/node
+            dockerfile: Dockerfile
+            args:
+                - NODE_VERSION=${NODE_VERSION}
+        volumes:
+            - ./:/var/www
+
+volumes:
+    database:
+        driver: local
+    # redis:
+    #   driver: local
+    #
+    # memcached:
+    #   driver: local

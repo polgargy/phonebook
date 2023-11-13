@@ -1,66 +1,267 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+## Overview
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+* [Installation](#installation)
+* [Environment](#environment)
+* [Laravel](#laravel)
+    * [Artisan](#artisan)
+    * [File storage](#file-storage)
+* [Makefile](#makefile)
+* [Aliases](#aliases)
+* [Database](#database)
+* [Redis](#redis)
+* [Mailhog](#mailhog)
+* [Logs](#logs)
+* [Running commands](#running-commands-from-containers)
+* [List of important commands](#list-of-important-commands)
 
-## About Laravel
+## Installation
+**1. Make sure you have [Docker ](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-18-04) and [Docker Compose](https://docs.docker.com/compose/install) installed**
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+**2. Run the installation script (it may take up to 10 minutes)**
+```
+make install
+```
+on Windows:
+```
+make install-win
+```
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+**3. That's it.**
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Open [http://localhost:8080](http://localhost:8080) url in your browser.
 
-## Learning Laravel
+#### Manual installation
+If you do not have available the make utility or you just want to install the project manually, you can go through the installation process running the following commands:
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+**Build and up docker containers (It may take up to 10 minutes)**
+```
+docker-compose up -d --build
+```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+**Install composer dependencies:**
+```
+docker-compose exec php composer install
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+**Set up laravel permissions**
+```
+sudo chown -R $USER:www-data storage
+sudo chown -R $USER:www-data bootstrap/cache
+sudo chmod -R 775 storage
+sudo chmod -R 775 bootstrap/cache
+```
 
-## Laravel Sponsors
+**Restart the node container**
+```
+docker-compose restart node
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Environment
+To up all containers, run the command:
+```
+# Make command
+make up
 
-### Premium Partners
+# Full command
+docker-compose up -d
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+To shut down all containers, run the command:
+```
+# Make command
+make down
 
-## Contributing
+# Full command
+docker-compose down
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
 
-## Code of Conduct
+#### Artisan
+Artisan commands can be used like this
+```
+docker-compose exec php php artisan migrate
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+If you want to generate a new controller or any laravel class, all commands should be executed from the current user like this, which grants all needed file permissions
+```
+docker-compose exec --user "$(id -u):$(id -g)" php php artisan make:controller HomeController
+```
 
-## Security Vulnerabilities
+However, to make the workflow a bit simpler, there is the _aliases.sh_ file, which allows to do the same work in this way
+```
+artisan make:controller HomeController
+```
+[More about aliases.sh](#Aliases)
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+#### File storage
+Nginx will proxy all requests with the `/storage` path prefix to the Laravel storage, so you can easily access it.
+Just make sure you run the `artisan storage:link` command (Runs automatically during the `make install` process).
 
-## License
+## Makefile
+There are a lot of useful make commands you can use.
+All of them you should run from the project directory where `Makefile` is located.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Examples:
+```
+# Up docker containers
+make up
+
+# Apply the migrations
+make db-migrate
+
+# Run tests
+make test
+
+# Down docker containers
+make down
+```
+
+Feel free to explore it and add your commands if you need them.
+
+## Aliases
+Also, there is the _aliases.sh_ file which you can apply with command:
+```
+source aliases.sh
+```
+_Note that you should always run this command when you open the new terminal instance._
+
+It helps to execute commands from different containers a bit simpler:
+
+For example, instead of
+```
+docker-compose exec php php artisan migrate
+```
+
+You can use the alias `from`:
+```
+from php php artisan migrate
+```
+
+But the big power is `artisan` alias
+
+If you want to generate a new controller or any Laravel class, all commands should be executed from the current user, which grants all needed file permissions
+```
+docker-compose exec --user "$(id -u):$(id -g)" php php artisan make:model Post
+```
+
+The `artisan` alias allows to do the same like this:
+```
+artisan make:model Post
+```
+
+## Database
+If you want to connect to the MySQL database from an external tool use the following parameters
+```
+HOST: localhost
+PORT: 33061
+DB: app
+USER: app
+PASSWORD: app
+```
+
+## Redis
+To connect to redis cli, use the command:
+```
+docker-compose exec redis redis-cli
+```
+
+If you want to connect with external GUI tool, use the port ```54321```
+
+## Mailhog
+If you want to check how all sent mail look, just go to [http://localhost:8026](http://localhost:8026).
+It is the test mail catcher tool for SMTP testing. All sent mails will be stored here..
+
+## Logs
+All **_nginx_** logs are available inside the _docker/nginx/logs_ directory.
+
+All **_supervisor_** logs are available inside the _docker/supervisor/logs_ directory.
+
+To view docker containers logs, use the command:
+```
+# All containers
+docker-compose logs
+
+# Concrete container
+docker-compose logs <container>
+```
+
+## Running commands from containers
+You can run commands from inside containers' cli. To enter into the container run the following command:
+```
+# PHP
+docker-compose exec php bash
+
+# NODE
+docker-compose exec node /bin/sh
+```
+
+## List of important commands
+**Start/stop the container**
+```
+make up
+make down
+make restart
+```
+**Status**
+```
+make s
+```
+**List all logs**
+```
+make logs
+```
+**Live node log**
+```
+make logs-n
+```
+**Composer**
+```
+make composer-install
+make composer-update
+```
+**NPM**
+```
+make npm-update
+```
+**Restart node**
+```
+make rn
+```
+**Build**
+```
+make build
+```
+OR
+```
+make build-no-cache
+```
+**Container cli**
+```
+make php
+make node
+```
+**DB Migrations**
+```
+make migrate
+make rollback
+make db-seed
+make db-fresh
+```
+**Permissions**
+```
+make perm
+```
+**Apply aliases**
+Have to run in every terminal instances
+```
+source aliases.sh
+```
+**Artisan commands**
+With aliases
+```
+artisan make:controller HomeController
+```
+Without aliases
+```
+docker-compose exec --user "$(id -u):$(id -g)" php php artisan make:controller HomeController
+```
