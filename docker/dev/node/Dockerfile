@@ -9,4 +9,5 @@ WORKDIR /var/www
 ENV HOST 0.0.0.0
 
 # Init command
+USER node
 CMD ["sh", "-c", "npm install && npm run dev"]

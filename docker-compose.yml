@@ -109,6 +109,8 @@ services:
             dockerfile: Dockerfile
             args:
                 - NODE_VERSION=${NODE_VERSION}
+        ports:
+            - "5173:5173"
         volumes:
             - ./:/var/www
 
