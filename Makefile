@@ -161,6 +161,9 @@ phpcs:
 phpcbf:
 	docker-compose exec -u1000 php vendor/bin/phpcbf -n
 
+node-fix:
+	docker-compose exec -u1000 node npm run lint
+
 
 #-----------------------------------------------------------
 # Dependencies
