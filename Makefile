@@ -154,12 +154,17 @@ dusk:
 metrics:
 	docker-compose exec -u1000 php vendor/bin/phpmetrics --report-html=tests/metrics app
 
+php-check: phpcbf phpstan
 php-fix: phpcbf
+
 phpcs:
 	docker-compose exec -u1000 php vendor/bin/phpcs -n
 
 phpcbf:
 	docker-compose exec -u1000 php vendor/bin/phpcbf -n
+
+phpstan:
+	docker-compose exec -u1000 php vendor/bin/phpstan analyse
 
 node-fix:
 	docker-compose exec -u1000 node npm run lint
