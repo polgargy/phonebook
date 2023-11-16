@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<ruleset name="polgargycs">
+    <description>Polgargy Coding Style</description>
+
+    <rule ref="PSR1" />
+    <rule ref="PSR2">
+        <exclude name="Generic.Files.LineEndings"></exclude>
+    </rule>
+
+    <file>app/</file>
+
+    <autoload>/vendor/autoload.php</autoload>
+
+    <arg name="encoding" value="UTF-8"/>
+    <arg name="extensions" value="php"/>
+</ruleset>
