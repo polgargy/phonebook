@@ -154,7 +154,7 @@ dusk:
 metrics:
 	docker-compose exec -u1000 php vendor/bin/phpmetrics --report-html=tests/metrics app
 
-php-check: phpcbf phpstan
+php-check: phpcs phpstan
 php-fix: phpcbf
 
 phpcs:

@@ -13,8 +13,9 @@
         "@vitejs/plugin-vue": "^4.0.0",
         "@vue/eslint-config-prettier": "^8.0.0",
         "autoprefixer": "^10.4.12",
-        "axios": "^1.1.2",
+        "axios": "^1.6.2",
         "eslint": "^8.53.0",
+        "eslint-plugin-import": "^2.29.0",
         "eslint-plugin-vue": "^9.18.1",
         "laravel-vite-plugin": "^0.8.0",
         "postcss": "^8.4.18",
@@ -25,6 +26,8 @@
     },
     "dependencies": {
         "@headlessui/vue": "^1.7.16",
-        "@heroicons/vue": "^2.0.18"
+        "@heroicons/vue": "^2.0.18",
+        "maska": "^2.1.10",
+        "vue-axios": "^3.5.2"
     }
 }
